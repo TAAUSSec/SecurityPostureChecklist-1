@@ -454,7 +454,7 @@
 
         <div class="stats">
             <div class="stat-card">
-                <span class="stat-number" id="total-items">46</span>
+                <span class="stat-number" id="total-items">48</span>
                 <span class="stat-label">Total Controls</span>
             </div>
             <div class="stat-card">
@@ -462,7 +462,7 @@
                 <span class="stat-label">Completed</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number" id="remaining-items">46</span>
+                <span class="stat-number" id="remaining-items">48</span>
                 <span class="stat-label">Remaining</span>
             </div>
         </div>
@@ -571,7 +571,7 @@
             <div class="category-header">
                 <span class="category-icon">🌐</span>
                 <h2 class="category-title">Network Security</h2>
-                <span class="category-progress" data-progress>0/6</span>
+                <span class="category-progress" data-progress>0/7</span>
             </div>
 
             <div class="checklist-item">
@@ -633,6 +633,16 @@
                     <div class="item-description">Implement DNS filtering to block malicious domains, phishing sites, and inappropriate content.</div>
                 </label>
             </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="nsm">
+                </div>
+                <label for="nsm" class="item-content">
+                    <div class="item-title">Network Security Monitoring (NSM)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Deploy continuous network traffic analysis and monitoring to detect anomalies, lateral movement, and data exfiltration attempts in real-time.</div>
+                </label>
+            </div>
         </div>
 
         <!-- Endpoint Security -->
@@ -645,21 +655,11 @@
 
             <div class="checklist-item">
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" id="edr">
+                    <input type="checkbox" id="endpoint-protection">
                 </div>
-                <label for="edr" class="item-content">
-                    <div class="item-title">Endpoint Detection & Response (EDR)<span class="priority-badge priority-critical">Critical</span></div>
-                    <div class="item-description">Deploy EDR solution on all workstations and servers for advanced threat detection and response.</div>
-                </label>
-            </div>
-
-            <div class="checklist-item">
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="antivirus">
-                </div>
-                <label for="antivirus" class="item-content">
-                    <div class="item-title">Enterprise Antivirus/Anti-malware<span class="priority-badge priority-critical">Critical</span></div>
-                    <div class="item-description">Install and maintain up-to-date antivirus on all devices with real-time scanning enabled.</div>
+                <label for="endpoint-protection" class="item-content">
+                    <div class="item-title">Advanced Endpoint Protection with EDR<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Deploy next-generation endpoint protection with EDR capabilities, behavioral analysis, sandboxing, and automated threat response on all workstations and servers.</div>
                 </label>
             </div>
 
@@ -712,6 +712,16 @@
                     <div class="item-description">Implement MDM for BYOD and company-owned mobile devices with remote wipe capabilities.</div>
                 </label>
             </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="hardened-os">
+                </div>
+                <label for="hardened-os" class="item-content">
+                    <div class="item-title">Hardened OS Images (CIS/STIG)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Deploy systems using hardened operating system images based on CIS Benchmarks or DISA STIG standards. Disable unnecessary services, ports, and protocols.</div>
+                </label>
+            </div>
         </div>
 
         <!-- Data Protection -->
@@ -727,8 +737,8 @@
                     <input type="checkbox" id="backup-strategy">
                 </div>
                 <label for="backup-strategy" class="item-content">
-                    <div class="item-title">3-2-1 Backup Strategy<span class="priority-badge priority-critical">Critical</span></div>
-                    <div class="item-description">Maintain 3 copies of data, on 2 different media types, with 1 copy offsite. Test restoration regularly.</div>
+                    <div class="item-title">Automated Cloud Backup & Recovery<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Implement automated, immutable cloud backups with air-gapped copies. Include ransomware protection, version control, and regular recovery testing. Ensure compliance with data residency requirements.</div>
                 </label>
             </div>
 
@@ -926,7 +936,7 @@
             <div class="category-header">
                 <span class="category-icon">📋</span>
                 <h2 class="category-title">Compliance & Governance</h2>
-                <span class="category-progress" data-progress>0/7</span>
+                <span class="category-progress" data-progress>0/8</span>
             </div>
 
             <div class="checklist-item">
@@ -996,6 +1006,16 @@
                 <label for="asset-inventory" class="item-content">
                     <div class="item-title">IT Asset Inventory<span class="priority-badge priority-high">High</span></div>
                     <div class="item-description">Maintain current inventory of hardware, software, and cloud services with clear ownership assignments.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="ai-governance">
+                </div>
+                <label for="ai-governance" class="item-content">
+                    <div class="item-title">AI Governance & Usage Policy<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Establish policies for AI tool usage, including data input restrictions, client confidentiality protections, approved AI platforms, and staff training on AI security risks.</div>
                 </label>
             </div>
         </div>
