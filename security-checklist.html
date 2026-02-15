@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMB Security Posture Checklist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #141824;
+            --bg-card: #1a1f2e;
+            --text-primary: #e8edf4;
+            --text-secondary: #9ba4b5;
+            --accent-green: #00ff88;
+            --accent-amber: #ffb340;
+            --accent-red: #ff4466;
+            --border: #2a3142;
+            --glow-green: rgba(0, 255, 136, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(42, 49, 66, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42, 49, 66, 0.3) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            opacity: 0.5;
+            animation: gridScroll 20s linear infinite;
+        }
+
+        @keyframes gridScroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(40px); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 20px var(--glow-green);
+        }
+
+        .stat-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--accent-green);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .category {
+            margin-bottom: 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .category:nth-child(4) { animation-delay: 0.2s; }
+        .category:nth-child(5) { animation-delay: 0.3s; }
+        .category:nth-child(6) { animation-delay: 0.4s; }
+        .category:nth-child(7) { animation-delay: 0.5s; }
+        .category:nth-child(8) { animation-delay: 0.6s; }
+        .category:nth-child(9) { animation-delay: 0.7s; }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .category-progress {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .checklist-item:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border);
+        }
+
+        .checklist-item.checked {
+            opacity: 0.6;
+        }
+
+        .checklist-item.checked:hover {
+            opacity: 0.8;
+        }
+
+        .checkbox-wrapper {
+            position: relative;
+            min-width: 24px;
+            height: 24px;
+            margin-top: 0.1rem;
+        }
+
+        input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            appearance: none;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        input[type="checkbox"]:checked {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            animation: checkPulse 0.3s ease;
+        }
+
+        @keyframes checkPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--bg-primary);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        input[type="checkbox"]:hover {
+            border-color: var(--accent-green);
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+
+        .item-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 0.5rem;
+        }
+
+        .priority-critical {
+            background: var(--accent-red);
+            color: var(--bg-primary);
+        }
+
+        .priority-high {
+            background: var(--accent-amber);
+            color: var(--bg-primary);
+        }
+
+        .priority-medium {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+        }
+
+        .overall-progress {
+            position: sticky;
+            top: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            z-index: 10;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .progress-percentage {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-amber));
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .consultation-btn {
+            display: inline-block;
+            padding: 1.25rem 2.5rem;
+            background: linear-gradient(135deg, #488291, #5a9aa8);
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 20px rgba(72, 130, 145, 0.4);
+            border: 2px solid transparent;
+        }
+
+        .consultation-btn:hover {
+            background: linear-gradient(135deg, #5a9aa8, #6bb0c0);
+            box-shadow: 0 6px 30px rgba(72, 130, 145, 0.6);
+            transform: translateY(-2px);
+            border-color: rgba(72, 130, 145, 0.3);
+        }
+
+        .consultation-btn:active {
+            transform: translateY(0);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .category {
+                padding: 1.5rem;
+            }
+
+            .category-title {
+                font-size: 1.4rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Security Posture Checklist</h1>
+            <p class="subtitle">A Comprehensive Security Assessment Framework for Financial Institutions and Professional Service firms</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <span class="stat-number" id="total-items">46</span>
+                <span class="stat-label">Total Controls</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="completed-items">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="remaining-items">46</span>
+                <span class="stat-label">Remaining</span>
+            </div>
+        </div>
+
+        <div class="overall-progress">
+            <div class="progress-header">
+                <span class="progress-title">Overall Progress</span>
+                <span class="progress-percentage" id="overall-percentage">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Access Control -->
+        <div class="category" data-category="access-control">
+            <div class="category-header">
+                <span class="category-icon">🔐</span>
+                <h2 class="category-title">Access Control & Authentication</h2>
+                <span class="category-progress" data-progress>0/8</span>
+            </div>
+            
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="mfa">
+                </div>
+                <label for="mfa" class="item-content">
+                    <div class="item-title">Multi-Factor Authentication (MFA)<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Enforce MFA for all user accounts, especially admin and privileged accounts. Use app-based authenticators or hardware tokens.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="password-policy">
+                </div>
+                <label for="password-policy" class="item-content">
+                    <div class="item-title">Strong Password Policy<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Implement minimum 12-character passwords with complexity requirements. Enforce regular password changes and prevent password reuse.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="rbac">
+                </div>
+                <label for="rbac" class="item-content">
+                    <div class="item-title">Role-Based Access Control (RBAC)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Implement least privilege access. Users should only have permissions necessary for their job functions.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="access-review">
+                </div>
+                <label for="access-review" class="item-content">
+                    <div class="item-title">Regular Access Reviews<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Conduct quarterly reviews of user access rights. Remove access for departed personnel immediately.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="privileged-access">
+                </div>
+                <label for="privileged-access" class="item-content">
+                    <div class="item-title">Privileged Access Management<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Implement separate admin accounts, session recording, and approval workflows for privileged access.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="session-timeout">
+                </div>
+                <label for="session-timeout" class="item-content">
+                    <div class="item-title">Session Timeout Policies<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Configure automatic session timeouts after 15 minutes of inactivity for sensitive systems.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="sso">
+                </div>
+                <label for="sso" class="item-content">
+                    <div class="item-title">Single Sign-On (SSO)<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Implement SSO to centralize authentication and reduce password sprawl across applications.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="conditional-access">
+                </div>
+                <label for="conditional-access" class="item-content">
+                    <div class="item-title">Conditional Access Policies<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Implement context-aware access controls that evaluate device health, location, risk level, and user behavior before granting access to resources.</div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Network Security -->
+        <div class="category" data-category="network">
+            <div class="category-header">
+                <span class="category-icon">🌐</span>
+                <h2 class="category-title">Network Security</h2>
+                <span class="category-progress" data-progress>0/6</span>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="firewall">
+                </div>
+                <label for="firewall" class="item-content">
+                    <div class="item-title">Next-Gen Firewall Deployment<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Deploy and configure enterprise firewall with intrusion prevention, application control, and regular rule reviews.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="network-segmentation">
+                </div>
+                <label for="network-segmentation" class="item-content">
+                    <div class="item-title">Network Segmentation<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Segment network into zones (DMZ, internal, guest) with controlled traffic flow between segments.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="sase-ztna">
+                </div>
+                <label for="sase-ztna" class="item-content">
+                    <div class="item-title">SASE/Zero Trust Network Access (ZTNA)<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Implement SASE or ZTNA solution for secure remote access. Verify identity and context for every access request, eliminating implicit trust.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="wifi-security">
+                </div>
+                <label for="wifi-security" class="item-content">
+                    <div class="item-title">Wireless Network Security<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Use WPA3 encryption, separate guest networks, and disable WPS. Change default router credentials.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="ids-ips">
+                </div>
+                <label for="ids-ips" class="item-content">
+                    <div class="item-title">Intrusion Detection/Prevention<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Deploy IDS/IPS solutions to monitor and block malicious network activity in real-time.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="dns-filtering">
+                </div>
+                <label for="dns-filtering" class="item-content">
+                    <div class="item-title">DNS Filtering & Protection<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Implement DNS filtering to block malicious domains, phishing sites, and inappropriate content.</div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Endpoint Security -->
+        <div class="category" data-category="endpoint">
+            <div class="category-header">
+                <span class="category-icon">💻</span>
+                <h2 class="category-title">Endpoint Security</h2>
+                <span class="category-progress" data-progress>0/7</span>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="edr">
+                </div>
+                <label for="edr" class="item-content">
+                    <div class="item-title">Endpoint Detection & Response (EDR)<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Deploy EDR solution on all workstations and servers for advanced threat detection and response.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="antivirus">
+                </div>
+                <label for="antivirus" class="item-content">
+                    <div class="item-title">Enterprise Antivirus/Anti-malware<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Install and maintain up-to-date antivirus on all devices with real-time scanning enabled.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="patch-management">
+                </div>
+                <label for="patch-management" class="item-content">
+                    <div class="item-title">Automated Patch Management<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Implement automated patching for OS and applications. Critical patches within 48 hours.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="disk-encryption">
+                </div>
+                <label for="disk-encryption" class="item-content">
+                    <div class="item-title">Full Disk Encryption<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Enable BitLocker/FileVault on all laptops and workstations to protect data if devices are lost or stolen.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="usb-control">
+                </div>
+                <label for="usb-control" class="item-content">
+                    <div class="item-title">USB & Removable Media Control<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Restrict or monitor USB device usage to prevent data exfiltration and malware introduction.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="screen-lock">
+                </div>
+                <label for="screen-lock" class="item-content">
+                    <div class="item-title">Automatic Screen Lock<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Enforce automatic screen lock after 5 minutes of inactivity on all devices.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="mdm">
+                </div>
+                <label for="mdm" class="item-content">
+                    <div class="item-title">Mobile Device Management (MDM)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Implement MDM for BYOD and company-owned mobile devices with remote wipe capabilities.</div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Data Protection -->
+        <div class="category" data-category="data">
+            <div class="category-header">
+                <span class="category-icon">🗄️</span>
+                <h2 class="category-title">Data Protection</h2>
+                <span class="category-progress" data-progress>0/6</span>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="backup-strategy">
+                </div>
+                <label for="backup-strategy" class="item-content">
+                    <div class="item-title">3-2-1 Backup Strategy<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Maintain 3 copies of data, on 2 different media types, with 1 copy offsite. Test restoration regularly.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="data-classification">
+                </div>
+                <label for="data-classification" class="item-content">
+                    <div class="item-title">Data Classification Policy<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Classify data (Public, Internal, Confidential, Restricted) with special attention to client data, financial records, and regulated information. Apply appropriate protection controls.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="encryption-transit">
+                </div>
+                <label for="encryption-transit" class="item-content">
+                    <div class="item-title">Encryption in Transit<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Use TLS 1.2+ for all data transmission. Disable older protocols (SSL, TLS 1.0/1.1).</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="encryption-rest">
+                </div>
+                <label for="encryption-rest" class="item-content">
+                    <div class="item-title">Encryption at Rest<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Encrypt sensitive data stored in databases, file shares, and cloud storage using AES-256. Essential for client data, financial records, and proprietary information.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="dlp">
+                </div>
+                <label for="dlp" class="item-content">
+                    <div class="item-title">Data Loss Prevention (DLP)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Implement DLP solutions to prevent unauthorized exfiltration of client data, financial information, and confidential records via email, USB, and cloud services.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="data-retention">
+                </div>
+                <label for="data-retention" class="item-content">
+                    <div class="item-title">Data Retention & Disposal<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Define and enforce data retention policies. Securely wipe or destroy data when no longer needed.</div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Email & Communication -->
+        <div class="category" data-category="email">
+            <div class="category-header">
+                <span class="category-icon">📧</span>
+                <h2 class="category-title">Email & Communication Security</h2>
+                <span class="category-progress" data-progress>0/5</span>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="email-gateway">
+                </div>
+                <label for="email-gateway" class="item-content">
+                    <div class="item-title">Advanced Email Security Gateway<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Deploy email security solution with anti-spam, anti-phishing, malware scanning, and URL rewriting.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="spf-dkim-dmarc">
+                </div>
+                <label for="spf-dkim-dmarc" class="item-content">
+                    <div class="item-title">SPF, DKIM, and DMARC<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Configure email authentication protocols to prevent domain spoofing and improve deliverability.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="email-encryption">
+                </div>
+                <label for="email-encryption" class="item-content">
+                    <div class="item-title">Email Encryption (S/MIME or PGP)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Enable email encryption for sensitive communications, especially with external parties.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="attachment-scanning">
+                </div>
+                <label for="attachment-scanning" class="item-content">
+                    <div class="item-title">Attachment Sandboxing<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Scan email attachments in isolated sandbox environment before delivery to detect threats.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="external-warning">
+                </div>
+                <label for="external-warning" class="item-content">
+                    <div class="item-title">External Email Warnings<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Add banners to emails from external senders to alert users of potential phishing attempts.</div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Monitoring & Response -->
+        <div class="category" data-category="monitoring">
+            <div class="category-header">
+                <span class="category-icon">👁️</span>
+                <h2 class="category-title">Monitoring & Incident Response</h2>
+                <span class="category-progress" data-progress>0/7</span>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="siem">
+                </div>
+                <label for="siem" class="item-content">
+                    <div class="item-title">Security Information & Event Management (SIEM)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Centralize log collection and analysis. Set up alerts for suspicious activities and security events.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="log-retention">
+                </div>
+                <label for="log-retention" class="item-content">
+                    <div class="item-title">Log Retention Policy<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Retain security logs for minimum 90 days. Protect logs from tampering with write-once storage.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="incident-plan">
+                </div>
+                <label for="incident-plan" class="item-content">
+                    <div class="item-title">Incident Response Plan<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Document incident response procedures, roles, and escalation paths. Test plan annually.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="vulnerability-scanning">
+                </div>
+                <label for="vulnerability-scanning" class="item-content">
+                    <div class="item-title">Regular Vulnerability Scanning<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Conduct monthly vulnerability scans of all systems. Remediate critical issues within 30 days.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="penetration-testing">
+                </div>
+                <label for="penetration-testing" class="item-content">
+                    <div class="item-title">Annual Penetration Testing<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Engage third-party security firm for annual penetration testing of external and internal systems.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="threat-intel">
+                </div>
+                <label for="threat-intel" class="item-content">
+                    <div class="item-title">Threat Intelligence Feeds<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Subscribe to threat intelligence services to stay informed about emerging threats and IOCs.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="security-metrics">
+                </div>
+                <label for="security-metrics" class="item-content">
+                    <div class="item-title">Security Metrics Dashboard<span class="priority-badge priority-medium">Medium</span></div>
+                    <div class="item-description">Track KPIs like mean time to detect/respond, patch compliance, and phishing click rates.</div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Compliance & Governance -->
+        <div class="category" data-category="compliance">
+            <div class="category-header">
+                <span class="category-icon">📋</span>
+                <h2 class="category-title">Compliance & Governance</h2>
+                <span class="category-progress" data-progress>0/7</span>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="security-policy">
+                </div>
+                <label for="security-policy" class="item-content">
+                    <div class="item-title">Information Security Policy<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Document comprehensive security policies covering acceptable use, data handling, and incident response.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="awareness-training">
+                </div>
+                <label for="awareness-training" class="item-content">
+                    <div class="item-title">Security Awareness Training<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Mandatory annual security training for all personnel. Quarterly phishing simulations.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="vendor-assessment">
+                </div>
+                <label for="vendor-assessment" class="item-content">
+                    <div class="item-title">Third-Party Risk Assessment<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Evaluate security posture of vendors and service providers with access to client data or financial systems. Require SOC 2, ISO 27001, or equivalent certifications.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="acceptable-use">
+                </div>
+                <label for="acceptable-use" class="item-content">
+                    <div class="item-title">Acceptable Use Policy (AUP)<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Define acceptable and prohibited uses of company IT resources. Require annual acknowledgment.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="byod-policy">
+                </div>
+                <label for="byod-policy" class="item-content">
+                    <div class="item-title">BYOD/Remote Work Policy<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Establish clear guidelines for personal device usage and remote work security requirements.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="privacy-compliance">
+                </div>
+                <label for="privacy-compliance" class="item-content">
+                    <div class="item-title">Privacy & Regulatory Compliance<span class="priority-badge priority-critical">Critical</span></div>
+                    <div class="item-description">Implement controls for data subject rights, consent management, and breach notification. Ensure compliance with GDPR, CCPA, GLBA, SOX, and industry-specific regulations.</div>
+                </label>
+            </div>
+
+            <div class="checklist-item">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="asset-inventory">
+                </div>
+                <label for="asset-inventory" class="item-content">
+                    <div class="item-title">IT Asset Inventory<span class="priority-badge priority-high">High</span></div>
+                    <div class="item-description">Maintain current inventory of hardware, software, and cloud services with clear ownership assignments.</div>
+                </label>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 4rem;">
+            <a href="https://www.taaus.com/schedule-consultation" class="consultation-btn" target="_blank" rel="noopener noreferrer">Schedule a Cybersecurity Consultation</a>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 1rem;">Get expert guidance on implementing these security controls for your organization</p>
+        </div>
+
+        <footer>
+            <p>© 2025 TAAUS Security Posture Framework | This checklist provides general guidance and should be customized for your firm's specific compliance requirements, including regulatory obligations for financial services and professional practices.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Calculate total items
+        const totalItems = document.querySelectorAll('input[type="checkbox"]').length;
+        document.getElementById('total-items').textContent = totalItems;
+
+        // Load saved state from localStorage
+        function loadProgress() {
+            // Progress tracking disabled - fresh state each visit
+            updateProgress();
+        }
+
+        // Save state to localStorage
+        function saveProgress(checkboxId, isChecked) {
+            // Progress saving disabled
+        }
+
+        // Update progress counters
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const completed = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const remaining = totalItems - completed;
+            const percentage = Math.round((completed / totalItems) * 100);
+
+            document.getElementById('completed-items').textContent = completed;
+            document.getElementById('remaining-items').textContent = remaining;
+            document.getElementById('overall-percentage').textContent = percentage + '%';
+            document.getElementById('progress-bar').style.width = percentage + '%';
+
+            // Update category progress
+            document.querySelectorAll('.category').forEach(category => {
+                const categoryCheckboxes = category.querySelectorAll('input[type="checkbox"]');
+                const categoryCompleted = category.querySelectorAll('input[type="checkbox"]:checked').length;
+                const categoryTotal = categoryCheckboxes.length;
+                const progressSpan = category.querySelector('[data-progress]');
+                progressSpan.textContent = `${categoryCompleted}/${categoryTotal}`;
+            });
+        }
+
+        // Handle checkbox changes
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const item = this.closest('.checklist-item');
+                if (this.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+                saveProgress(this.id, this.checked);
+                updateProgress();
+            });
+        });
+
+        // Handle label clicks
+        document.querySelectorAll('.item-content').forEach(label => {
+            label.addEventListener('click', function(e) {
+                if (e.target === this || e.target.classList.contains('item-title') || e.target.classList.contains('item-description')) {
+                    const checkbox = this.closest('.checklist-item').querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        // Export report
+//         function exportReport() {
+//             const categories = [];
+//             let allRecommendations = [];
+//             
+//             document.querySelectorAll('.category').forEach(category => {
+//                 const categoryName = category.querySelector('.category-title').textContent;
+//                 const items = [];
+//                 const categoryRecommendations = [];
+//                 
+//                 category.querySelectorAll('.checklist-item').forEach(item => {
+//                     const checkbox = item.querySelector('input[type="checkbox"]');
+//                     const title = item.querySelector('.item-title').textContent;
+//                     const description = item.querySelector('.item-description').textContent;
+//                     const priorityBadge = item.querySelector('.priority-badge');
+//                     const priority = priorityBadge ? priorityBadge.textContent : 'Medium';
+//                     
+//                     const itemData = {
+//                         title: title.replace(priority, '').trim(),
+//                         description: description,
+//                         priority: priority,
+//                         completed: checkbox.checked
+//                     };
+//                     
+//                     items.push(itemData);
+//                     
+//                     // Add to recommendations if not completed
+//                     if (!checkbox.checked) {
+//                         categoryRecommendations.push({
+//                             category: categoryName,
+//                             title: itemData.title,
+//                             description: itemData.description,
+//                             priority: priority
+//                         });
+//                     }
+//                 });
+//                 
+//                 allRecommendations = allRecommendations.concat(categoryRecommendations);
+//                 
+//                 const categoryCompleted = category.querySelectorAll('input[type="checkbox"]:checked').length;
+//                 const categoryTotal = items.length;
+//                 
+//                 categories.push({
+//                     name: categoryName,
+//                     items: items,
+//                     completion: {
+//                         completed: categoryCompleted,
+//                         total: categoryTotal,
+//                         percentage: Math.round((categoryCompleted / categoryTotal) * 100)
+//                     }
+//                 });
+//             });
+// 
+//             const completed = document.querySelectorAll('input[type="checkbox"]:checked').length;
+//             const percentage = Math.round((completed / totalItems) * 100);
+// 
+//             // Sort recommendations by priority
+//             const priorityOrder = { 'Critical': 1, 'High': 2, 'Medium': 3 };
+//             allRecommendations.sort((a, b) => {
+//                 return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
+//             });
+// 
+//             // Determine security posture level
+//             let postureLevel = '';
+//             let postureDescription = '';
+//             let postureColor = '';
+//             
+//             if (percentage >= 90) {
+//                 postureLevel = 'Excellent';
+//                 postureDescription = 'Your organization has implemented comprehensive security controls. Continue monitoring and updating your security posture.';
+//                 postureColor = '#00ff88';
+//             } else if (percentage >= 75) {
+//                 postureLevel = 'Good';
+//                 postureDescription = 'Your security posture is solid, but there are important gaps to address. Focus on the critical and high-priority items.';
+//                 postureColor = '#00ff88';
+//             } else if (percentage >= 50) {
+//                 postureLevel = 'Fair';
+//                 postureDescription = 'Your organization has basic security controls in place, but significant improvements are needed. Prioritize critical security controls immediately.';
+//                 postureColor = '#ffb340';
+//             } else if (percentage >= 25) {
+//                 postureLevel = 'Needs Improvement';
+//                 postureDescription = 'Your security posture has critical gaps that expose your organization to significant risk. Immediate action is required.';
+//                 postureColor = '#ff4466';
+//             } else {
+//                 postureLevel = 'Critical';
+//                 postureDescription = 'Your organization is highly vulnerable to cyber threats. Implement critical security controls immediately and consider engaging a security professional.';
+//                 postureColor = '#ff4466';
+//             }
+// 
+//             const report = {
+//                 generated: new Date().toISOString(),
+//                 score: {
+//                     percentage: percentage,
+//                     completed: completed,
+//                     total: totalItems,
+//                     remaining: totalItems - completed,
+//                     level: postureLevel,
+//                     description: postureDescription
+//                 },
+//                 summary: {
+//                     criticalItems: allRecommendations.filter(r => r.priority === 'Critical').length,
+//                     highItems: allRecommendations.filter(r => r.priority === 'High').length,
+//                     mediumItems: allRecommendations.filter(r => r.priority === 'Medium').length
+//                 },
+//                 recommendations: allRecommendations,
+//                 categories: categories
+//             };
+// 
+//             // Create a more readable text report
+//             let textReport = `
+// SECURITY POSTURE ASSESSMENT REPORT
+// Generated: ${new Date().toLocaleString()}
+// 
+// ═══════════════════════════════════════════════════════════════
+// 
+// OVERALL SCORE: ${percentage}% (${completed}/${totalItems} controls implemented)
+// SECURITY POSTURE: ${postureLevel.toUpperCase()}
+// 
+// ${postureDescription}
+// 
+// ═══════════════════════════════════════════════════════════════
+// 
+// CATEGORY BREAKDOWN:
+// `;
+// 
+//             categories.forEach(cat => {
+//                 textReport += `\n${cat.name}: ${cat.completion.percentage}% (${cat.completion.completed}/${cat.completion.total})\n`;
+//             });
+// 
+//             textReport += `
+// ═══════════════════════════════════════════════════════════════
+// 
+// RECOMMENDATIONS (${allRecommendations.length} items):
+// `;
+// 
+//             if (allRecommendations.length === 0) {
+//                 textReport += `\n✓ Congratulations! You have implemented all security controls.\n  Continue to review and update your security posture regularly.\n`;
+//             } else {
+//                 // Group by priority
+//                 ['Critical', 'High', 'Medium'].forEach(priority => {
+//                     const items = allRecommendations.filter(r => r.priority === priority);
+//                     if (items.length > 0) {
+//                         textReport += `\n${priority.toUpperCase()} PRIORITY (${items.length} items):\n`;
+//                         items.forEach((rec, index) => {
+//                             textReport += `\n${index + 1}. ${rec.title}\n`;
+//                             textReport += `   Category: ${rec.category}\n`;
+//                             textReport += `   ${rec.description}\n`;
+//                         });
+//                     }
+//                 });
+//             }
+// 
+//             textReport += `
+// ═══════════════════════════════════════════════════════════════
+// 
+// NEXT STEPS:
+// 
+// 1. Review all Critical and High priority recommendations
+// 2. Create an action plan with timelines for implementation
+// 3. Assign ownership for each security control
+// 4. Schedule regular reviews of your security posture
+// 5. Consider engaging a cybersecurity professional for assistance
+// 
+// ═══════════════════════════════════════════════════════════════
+// 
+// This report is for informational purposes only and should be
+// customized for your specific business needs and compliance requirements.
+// 
+// `;
+// 
+//             // Download text report
+//             const textBlob = new Blob([textReport], { type: 'text/plain' });
+//             const textUrl = URL.createObjectURL(textBlob);
+//             const textLink = document.createElement('a');
+//             textLink.href = textUrl;
+//             textLink.download = `security-assessment-report-${new Date().toISOString().split('T')[0]}.txt`;
+//             document.body.appendChild(textLink);
+//             textLink.click();
+//             document.body.removeChild(textLink);
+//             URL.revokeObjectURL(textUrl);
+// 
+//             // Generate PDF using jsPDF
+//             const { jsPDF } = window.jspdf;
+//             const doc = new jsPDF();
+//             
+//             const pageWidth = doc.internal.pageSize.getWidth();
+//             const pageHeight = doc.internal.pageSize.getHeight();
+//             const margin = 20;
+//             const maxWidth = pageWidth - (margin * 2);
+//             let yPos = margin;
+//             
+//             // Add TAAUS logo at top of first page
+//             const logoImg = new Image();
+//             logoImg.src = 'taaus-logo.png'; // Place logo in same directory as HTML
+//             
+//             // Helper function to add text with word wrap
+//             function addText(text, fontSize, isBold, color = [0, 0, 0], align = 'left') {
+//                 doc.setFontSize(fontSize);
+//                 doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+//                 doc.setTextColor(color[0], color[1], color[2]);
+//                 
+//                 const lines = doc.splitTextToSize(text, maxWidth);
+//                 
+//                 // Check if we need a new page
+//                 if (yPos + (lines.length * fontSize * 0.4) > pageHeight - margin) {
+//                     doc.addPage();
+//                     yPos = margin;
+//                 }
+//                 
+//                 if (align === 'center') {
+//                     lines.forEach(line => {
+//                         const textWidth = doc.getTextWidth(line);
+//                         doc.text(line, (pageWidth - textWidth) / 2, yPos);
+//                         yPos += fontSize * 0.4;
+//                     });
+//                 } else {
+//                     doc.text(lines, margin, yPos);
+//                     yPos += lines.length * fontSize * 0.4;
+//                 }
+//             }
+//             
+//             function addSpacer(height) {
+//                 yPos += height;
+//             }
+//             
+//             // Try to add logo, if it fails continue without it
+//             try {
+//                 // Add logo (reduced size)
+//                 const logoWidth = 50;
+//                 const logoHeight = 15;
+//                 doc.addImage(logoImg, 'PNG', margin, yPos, logoWidth, logoHeight);
+//                 yPos += logoHeight + 10;
+//             } catch (e) {
+//                 // If logo fails to load, just add text header
+//                 addText('TAAUS', 14, true, [72, 130, 145]);
+//                 addSpacer(5);
+//             }
+//             
+//             // Determine color based on score
+//             let scoreColor = percentage >= 75 ? [0, 200, 120] : percentage >= 50 ? [230, 150, 50] : [230, 70, 90];
+//             
+//             // Title Page
+//             addSpacer(5);
+//             addText('Security Posture Assessment', 18, true, [72, 130, 145], 'center');
+//             addSpacer(3);
+//             addText('SMB Security Checklist Report', 11, false, [120, 130, 140], 'center');
+//             addSpacer(12);
+//             
+//             // Score
+//             addText(`${percentage}%`, 36, true, scoreColor, 'center');
+//             addSpacer(3);
+//             addText(`Security Posture: ${postureLevel}`, 13, true, scoreColor, 'center');
+//             addSpacer(8);
+//             
+//             // Description
+//             addText(postureDescription, 9, false);
+//             addSpacer(12);
+//             
+//             // Summary Box
+//             doc.setDrawColor(200, 200, 200);
+//             doc.setFillColor(245, 245, 250);
+//             const boxHeight = 55;
+//             doc.rect(margin, yPos, maxWidth, boxHeight, 'FD');
+//             
+//             yPos += 8;
+//             doc.setTextColor(40, 40, 40);
+//             doc.setFontSize(9);
+//             doc.setFont('helvetica', 'bold');
+//             doc.text('Controls Implemented', margin + 5, yPos);
+//             doc.setFont('helvetica', 'normal');
+//             doc.text(`${completed} / ${totalItems}`, margin + 70, yPos);
+//             
+//             yPos += 7;
+//             doc.setFont('helvetica', 'bold');
+//             doc.text('Completion Rate', margin + 5, yPos);
+//             doc.setFont('helvetica', 'normal');
+//             doc.text(`${percentage}%`, margin + 70, yPos);
+//             
+//             yPos += 7;
+//             doc.setFont('helvetica', 'bold');
+//             doc.text('Critical Priority Items', margin + 5, yPos);
+//             doc.setFont('helvetica', 'normal');
+//             doc.text(String(allRecommendations.filter(r => r.priority === 'Critical').length), margin + 70, yPos);
+//             
+//             yPos += 7;
+//             doc.setFont('helvetica', 'bold');
+//             doc.text('High Priority Items', margin + 5, yPos);
+//             doc.setFont('helvetica', 'normal');
+//             doc.text(String(allRecommendations.filter(r => r.priority === 'High').length), margin + 70, yPos);
+//             
+//             yPos += 7;
+//             doc.setFont('helvetica', 'bold');
+//             doc.text('Medium Priority Items', margin + 5, yPos);
+//             doc.setFont('helvetica', 'normal');
+//             doc.text(String(allRecommendations.filter(r => r.priority === 'Medium').length), margin + 70, yPos);
+//             
+//             yPos += 12;
+//             
+//             // Timestamp
+//             doc.setTextColor(120, 120, 120);
+//             doc.setFontSize(8);
+//             doc.setFont('helvetica', 'italic');
+//             doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPos);
+//             
+//             // New page for categories
+//             doc.addPage();
+//             yPos = margin;
+//             
+//             // Category Breakdown
+//             addText('Category Breakdown', 14, true, [72, 130, 145]);
+//             addSpacer(8);
+//             
+//             categories.forEach(cat => {
+//                 const catPercent = cat.completion.percentage;
+//                 const catColor = catPercent >= 75 ? [0, 200, 120] : catPercent >= 50 ? [230, 150, 50] : [230, 70, 90];
+//                 addText(`${cat.name}: ${catPercent}% (${cat.completion.completed}/${cat.completion.total})`, 10, true, catColor);
+//                 addSpacer(4);
+//             });
+//             
+//             // New page for recommendations
+//             doc.addPage();
+//             yPos = margin;
+//             
+//             // Recommendations
+//             addText('Recommendations', 14, true, [72, 130, 145]);
+//             addSpacer(8);
+//             
+//             if (allRecommendations.length === 0) {
+//                 addText('✓ Congratulations! You have implemented all security controls.', 9, false);
+//                 addText('Continue to review and update your security posture regularly.', 9, false);
+//             } else {
+//                 addText(`Based on your assessment, we recommend implementing the following ${allRecommendations.length} security controls:`, 9, false);
+//                 addSpacer(8);
+//                 
+//                 // Group by priority
+//                 ['Critical', 'High', 'Medium'].forEach(priority => {
+//                     const items = allRecommendations.filter(r => r.priority === priority);
+//                     
+//                     if (items.length > 0) {
+//                         const priorityColor = priority === 'Critical' ? [230, 70, 90] : priority === 'High' ? [230, 150, 50] : [0, 200, 120];
+//                         addText(`${priority} Priority (${items.length} items)`, 11, true, priorityColor);
+//                         addSpacer(4);
+//                         
+//                         items.forEach((rec, index) => {
+//                             addText(`${index + 1}. ${rec.title}`, 9, true);
+//                             addText(`Category: ${rec.category}`, 8, false, [120, 120, 120]);
+//                             addText(rec.description, 8, false);
+//                             addSpacer(6);
+//                         });
+//                     }
+//                 });
+//             }
+//             
+//             // New page for next steps
+//             doc.addPage();
+//             yPos = margin;
+//             
+//             // Next Steps
+//             addText('Next Steps', 14, true, [72, 130, 145]);
+//             addSpacer(8);
+//             
+//             const nextSteps = [
+//                 'Review all Critical and High priority recommendations with your leadership team',
+//                 'Create an action plan with specific timelines for implementation',
+//                 'Assign clear ownership for each security control',
+//                 'Schedule regular quarterly reviews of your security posture',
+//                 'Consider engaging a cybersecurity professional for guidance',
+//                 'Document all security policies and procedures',
+//                 'Provide security awareness training to all employees'
+//             ];
+//             
+//             nextSteps.forEach((step, i) => {
+//                 addText(`${i + 1}. ${step}`, 9, false);
+//                 addSpacer(4);
+//             });
+//             
+//             addSpacer(10);
+//             addText('This report is for informational purposes only and should be customized for your specific business needs and compliance requirements.', 8, false, [120, 120, 120]);
+//             
+//             // Add TAAUS footer on last page
+//             addSpacer(10);
+//             doc.setTextColor(72, 130, 145);
+//             doc.setFontSize(9);
+//             doc.setFont('helvetica', 'bold');
+//             doc.text('Powered by TAAUS', margin, yPos, { align: 'left' });
+//             
+//             // Save the PDF
+//             doc.save(`TAAUS-Security-Assessment-${new Date().toISOString().split('T')[0]}.pdf`);
+// 
+//             console.log('Report generated:', report);
+//         }
+
+        // Initialize on page load
+        loadProgress();
+    </script>
+</body>
+</html>
